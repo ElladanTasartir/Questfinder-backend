@@ -1,7 +1,7 @@
 {
   "name": "questfinder-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./src/index.js",
   "repository": "https://github.com/ElladanTasartir/Questfinder-backend",
   "author": "Erick Malta <erickmalta100@gmail.com>",
   "scripts": {
@@ -9,7 +9,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "express": "^4.17.1"
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.16",
+    "validator": "^13.0.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
