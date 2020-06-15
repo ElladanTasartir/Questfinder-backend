@@ -1,4 +1,3 @@
-/* eslint no-console: ["error", { allow: ["warn", "error", "log"]}] */
 require("dotenv").config();
 // Importamos o Express para resolver rotas
 const express = require("express");
