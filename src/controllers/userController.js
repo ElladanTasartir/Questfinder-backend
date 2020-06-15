@@ -1,27 +1,31 @@
 // Importamos aqui o model para lidar com usuários já com conexão com o banco de dados
-const User = require("../model/UserModel");
+const User = require('../model/UserModel');
 
 // Já exportamos aqui nosso código como arrow function async
-exports.create = async (req, res) => {
-  // Instância nosso model já pegando o corpo da requisição
-  const user = new User(req.body);
-  // Usamos o model para validar e registrar no banco de dados o usuário criado
-  const userCreated = await user.register();
+exports.create = async (req, res, next) => {
+  try {
+    const user = new User(req.body);
 
-  // caso a nossa const userCreated não retorne como esperado,  lançamos como response o metodo do Model, User, chamado errors e aqui chamado como user.errors
-  if (!userCreated) return res.json(user.errors);
+    const userCreated = await user.register();
 
-  // Se tudo correr bem e o if acima não for acionado, retornamos o usuário criado à rota
-  return res.json(userCreated);
+    if (!userCreated) return res.json(user.errors);
+
+    return res.status(201).json(userCreated);
+  } catch (err) {
+    next(err);
+  }
 };
 
-exports.login = async (req, res) => {
-  // Declaração da instância de User
-  const login = new User(req.body);
-  // Chamamos o model com a função de login para a validação
-  await login.login();
-  // Se o usuário não existir, retornamos o método do model com o erro
-  if (!login.user) return res.json(login.errors);
+exports.login = async (req, res, next) => {
+  try {
+    const login = new User(req.body);
 
-  return res.send("Login validado com sucesso!");
+    await login.login();
+
+    if (!login.user) return res.json(login.errors);
+
+    return res.status(200).json({ message: 'Login validado com sucesso!' });
+  } catch (err) {
+    next(err);
+  }
 };
