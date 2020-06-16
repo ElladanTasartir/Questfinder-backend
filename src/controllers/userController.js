@@ -29,3 +29,15 @@ exports.login = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.alter = async (req, res, next) => {
+  try {
+    const alter = new User(req.body);
+
+    await alter.alter(req.params.ra);
+
+    return res.status(200).json({ message: 'Usuário alterado com sucesso!' });
+  } catch (err) {
+    next(err);
+  }
+};
