@@ -13,5 +13,7 @@ route.post('/users/register', userController.create);
 // Rota de Login
 route.post('/login', userController.login);
 
+route.put('/users/:ra', userController.alter);
+
 // exporta as rotas para serem devidamente indexadas no index.js
 module.exports = route;
