@@ -8,8 +8,6 @@ exports.create = async (req, res, next) => {
 
     const userCreated = await user.register();
 
-    if (!userCreated) return res.json(user.errors);
-
     return res.status(201).json(userCreated);
   } catch (err) {
     next(err);
@@ -21,8 +19,6 @@ exports.login = async (req, res, next) => {
     const login = new User(req.body);
 
     await login.login();
-
-    if (!login.user) return res.json(login.errors);
 
     return res.status(200).json({ message: 'Login validado com sucesso!' });
   } catch (err) {
