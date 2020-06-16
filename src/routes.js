@@ -13,5 +13,8 @@ route.post('/users/register', userController.create);
 // Rota de Login
 route.post('/login', userController.login);
 
+// Rota de Procurar Usuário
+route.get('/users/:ra', userController.search);
+
 // exporta as rotas para serem devidamente indexadas no index.js
 module.exports = route;
