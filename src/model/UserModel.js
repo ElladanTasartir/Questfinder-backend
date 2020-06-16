@@ -24,6 +24,11 @@ class User {
     this.user = null;
   }
 
+  encryptPassword() {
+    const salt = bcryptjs.genSaltSync();
+    this.body.password = bcryptjs.hashSync(this.body.password, salt);
+  }
+
   // Função responsável por registrar o usuário novo no banco de dados
   async register() {
     this.checkBodyKeys();
@@ -37,13 +42,15 @@ class User {
       password: this.body.password,
     };
 
-    if (await this.userExists())
+    if (!(await this.userExists(this.body.ra)))
+      throw new ValidationError('Já existe um usuário cadastrado com este RA');
+
+    if (!(await this.emailExists(this.body.email)))
       throw new ValidationError(
-        'Já existe um usuário cadastrado com este RA ou email',
+        'Já existe um usuário cadastrado com este email',
       );
 
-    const salt = bcryptjs.genSaltSync();
-    this.body.password = bcryptjs.hashSync(this.body.password, salt);
+    this.encryptPassword();
 
     this.user = await UserModel.create(this.body);
     return this.user;
@@ -67,14 +74,20 @@ class User {
       throw new ValidationError('Dados inválidos');
   }
 
-  async userExists() {
-    const userRA = await UserModel.findOne({ ra: this.body.ra });
+  async userExists(ra) {
+    const userRA = await UserModel.findOne({ ra });
 
     if (userRA) return;
 
-    const userEmail = await UserModel.findOne({ email: this.body.email });
+    return true;
+  }
+
+  async emailExists(email) {
+    const userEmail = await UserModel.findOne({ email });
 
     if (userEmail) return;
+
+    return true;
   }
 
   async login() {
@@ -106,12 +119,12 @@ class User {
       password: this.body.password,
     };
 
-    if (!this.userExists())
+    this.encryptPassword();
+
+    if (await this.userExists(ra))
       throw new ValidationError('Este usuário não existe!');
 
     this.user = await UserModel.updateOne({ ra }, this.body);
-
-    console.log(this.user);
   }
 
   // Função que faz a busca por usuário registrado, pelo RA
