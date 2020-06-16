@@ -95,6 +95,23 @@ class User {
       throw new ValidationError('A senha digitada é inválida');
     }
   }
+
+  async alter(ra) {
+    this.body = {
+      nome: this.body.nome,
+      email: this.body.email,
+      senha: this.body.senha,
+    };
+
+    this.userExists();
+
+    this.user = await UserModel.updateOne({ ra }, this.body);
+
+    console.log(this.user);
+
+    
+
+  }
 }
 
 module.exports = User;
