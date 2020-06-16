@@ -7,9 +7,9 @@ const ValidationError = require('../errors/ValidationError');
 const UserSchema = new mongoose.Schema(
   {
     ra: { type: String, required: true },
-    nome: { type: String, required: true },
+    name: { type: String, required: true },
     email: { type: String, required: true },
-    senha: { type: String, require: true },
+    password: { type: String, require: true },
   },
   { versionKey: false },
 );
@@ -32,15 +32,15 @@ class User {
 
     this.body = {
       ra: this.body.ra,
-      nome: this.body.nome,
+      name: this.body.name,
       email: this.body.email,
-      senha: this.body.senha,
+      password: this.body.password,
     };
 
     await this.userExists();
 
     const salt = bcryptjs.genSaltSync();
-    this.body.senha = bcryptjs.hashSync(this.body.senha, salt);
+    this.body.password = bcryptjs.hashSync(this.body.password, salt);
 
     this.user = await UserModel.create(this.body);
     return this.user;
@@ -48,10 +48,10 @@ class User {
 
   checkBodyKeys() {
     if (!this.body.ra) throw new ValidationError('RA é um dado necessário');
-    if (!this.body.nome) throw new ValidationError('Nome é um dado necessário');
+    if (!this.body.name) throw new ValidationError('Nome é um dado necessário');
     if (!this.body.email)
       throw new ValidationError('Email é um dado necessário');
-    if (!this.body.senha)
+    if (!this.body.password)
       throw new ValidationError('Senha é um dado necessário');
   }
 
@@ -60,7 +60,7 @@ class User {
     if (!validator.isEmail(this.body.email))
       throw new ValidationError('Email inválido');
 
-    if (this.body.senha.length < 6 || this.body.senha.length > 16)
+    if (this.body.password.length < 6 || this.body.password.length > 16)
       throw new ValidationError('Dados inválidos');
   }
 
@@ -81,7 +81,7 @@ class User {
   async login() {
     this.body = {
       ra: this.body.ra,
-      senha: this.body.senha,
+      password: this.body.password,
     };
 
     this.user = await UserModel.findOne({ ra: this.body.ra });
@@ -90,10 +90,24 @@ class User {
       throw new ValidationError('Usuário não encontrado');
     }
 
-    if (!bcryptjs.compareSync(this.body.senha, this.user.senha)) {
+    if (!bcryptjs.compareSync(this.body.password, this.user.password)) {
       this.user = null;
       throw new ValidationError('A senha digitada é inválida');
     }
+  }
+
+  // Função que faz a busca por usuário registrado, pelo RA
+  async search(ra) {
+    // Pesquisa primeira ocorrência do usuário com o RA no banco (no caso, a única ocorrência)
+    this.user = await UserModel.findOne({ ra });
+
+    // Se não for usuário válido, retorna a mensagem abaixo
+    if (!this.user) {
+      throw new ValidationError('Usuário não encontrado');
+    }
+
+    // Retorna o usuário caso a busca seja bem sucedida
+    return this.user;
   }
 }
 
