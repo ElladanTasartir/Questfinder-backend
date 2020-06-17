@@ -2,7 +2,7 @@
 const User = require('../model/UserModel');
 
 // Já exportamos aqui nosso código como arrow function async
-exports.create = async (req, res, next) => {
+const create = async (req, res, next) => {
   try {
     const user = new User(req.body);
 
@@ -14,11 +14,11 @@ exports.create = async (req, res, next) => {
   }
 };
 
-exports.login = async (req, res, next) => {
+const login = async (req, res, next) => {
   try {
-    const login = new User(req.body);
+    const loginUser = new User(req.body);
 
-    await login.login();
+    await loginUser.login();
 
     return res.status(200).json({ message: 'Login validado com sucesso!' });
   } catch (err) {
@@ -26,11 +26,11 @@ exports.login = async (req, res, next) => {
   }
 };
 
-exports.alter = async (req, res, next) => {
+const alter = async (req, res, next) => {
   try {
-    const alter = new User(req.body);
+    const alterUser = new User(req.body);
 
-    await alter.alter(req.params.ra);
+    await alterUser.alter(req.params.ra);
 
     return res.status(200).json({ message: 'Usuário alterado com sucesso!' });
   } catch (err) {
@@ -38,16 +38,18 @@ exports.alter = async (req, res, next) => {
   }
 };
 // Método reponsável pela pesquisa do usuário no banco de dados
-exports.search = async (req, res, next) => {
+const search = async (req, res, next) => {
   try {
     const searchUser = new User(); // Constante que recebe um novo usuário(atributos)
 
     // Constante que recebe o retorno da busca de um usuário pelo RA
-    const search = await searchUser.search(req.params.ra); // Utiliza o params para utilizar o dado
+    const found = await searchUser.search(req.params.ra); // Utiliza o params para utilizar o dado
 
     // Após a busca ser bem sucedida, retorna o status de sucesso e o usuário encontrado
-    return res.status(200).json({ user: search });
+    return res.status(200).json({ user: found });
   } catch (err) {
     next(err); // Retorna mensagem de erro
   }
 };
+
+module.exports = { create, login, alter, search };

@@ -1,6 +1,6 @@
 const Event = require('../model/EventModel');
 
-exports.create = async (req, res, next) => {
+const create = async (req, res, next) => {
   try {
     const event = new Event(req.body);
 
@@ -11,3 +11,9 @@ exports.create = async (req, res, next) => {
     next(err);
   }
 };
+
+const alter = async (req, res) => {
+  return res.status(200).json({ message: 'top' });
+};
+
+module.exports = { create, alter };
