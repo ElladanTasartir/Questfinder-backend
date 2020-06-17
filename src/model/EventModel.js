@@ -8,7 +8,7 @@ const EventSchema = new mongoose.Schema(
     date: { type: Date, required: true },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
-    active: { type: Boolean, required: true, default: false },
+    active: { type: Boolean, required: true, default: true },
   },
   { versionKey: false },
 );
@@ -72,6 +72,26 @@ class Event {
 
     this.event = await EventModel.create(this.body);
     return this.event;
+  }
+
+  async alter() {
+    this.checkBodyKeys();
+    this.validate();
+
+    this.body = {
+      name: this.body.name,
+      description: this.body.description,
+      date: this.body.date,
+      latitude: this.body.latitude,
+      longitude: this.body.longitude,
+      active: this.body.active || false,
+    };
+  }
+
+  async eventExists(id) {
+    const eventId = await EventModel.findOne({ id });
+
+    return !eventId ? true : null;
   }
 }
 

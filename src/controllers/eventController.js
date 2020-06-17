@@ -12,8 +12,12 @@ const create = async (req, res, next) => {
   }
 };
 
-const alter = async (req, res) => {
-  return res.status(200).json({ message: 'top' });
+const alter = async (req, res, next) => {
+  try {
+    const alterEvent = new Event(req.body);
+  } catch (err) {
+    next(err);
+  }
 };
 
 module.exports = { create, alter };

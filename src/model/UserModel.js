@@ -77,17 +77,13 @@ class User {
   async userExists(ra) {
     const userRA = await UserModel.findOne({ ra });
 
-    if (userRA) return;
-
-    return true;
+    return !userRA ? true : null;
   }
 
   async emailExists(email) {
     const userEmail = await UserModel.findOne({ email });
 
-    if (userEmail) return;
-
-    return true;
+    return !userEmail ? true : null;
   }
 
   async login() {
