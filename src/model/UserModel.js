@@ -120,7 +120,11 @@ class User {
     if (await this.userExists(ra))
       throw new ValidationError('Este usuário não existe!');
 
-    this.user = await UserModel.updateOne({ ra }, this.body);
+    await UserModel.updateOne({ ra }, this.body);
+
+    this.user = await UserModel.findOne({ ra });
+
+    return this.user;
   }
 
   // Função que faz a busca por usuário registrado, pelo RA

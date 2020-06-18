@@ -12,16 +12,35 @@ const create = async (req, res, next) => {
   }
 };
 
+const search = async (req, res, next) => {
+  try {
+    const searchEvent = new Event();
+
+    const active = req.query.active ? req.query : null;
+
+    const foundEvent = await searchEvent.search(active);
+
+    return res.status(200).json({ event: foundEvent });
+  } catch (err) {
+    next(err);
+  }
+};
 const alter = async (req, res, next) => {
   try {
+    const { id } = req.params;
+
+    console.log(id);
+
     const alterEvent = new Event(req.body);
-    return alterEvent;
+
+    const alteredEvent = await alterEvent.alter(id);
+
+    return res.status(200).json(alteredEvent);
   } catch (err) {
     next(err);
   }
 };
 
-// Método para inativar o evento
 const inativate = async (req, res, next) => {
   try {
     const event = new Event();
@@ -36,4 +55,4 @@ const inativate = async (req, res, next) => {
   }
 };
 
-module.exports = { create, alter, inativate };
+module.exports = { create, alter, inativate, search };

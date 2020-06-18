@@ -30,9 +30,11 @@ const alter = async (req, res, next) => {
   try {
     const alterUser = new User(req.body);
 
-    await alterUser.alter(req.params.ra);
+    const alteredUser = await alterUser.alter(req.params.ra);
 
-    return res.status(200).json({ message: 'Usuário alterado com sucesso!' });
+    console.log(alteredUser);
+
+    return res.status(200).json(alteredUser);
   } catch (err) {
     next(err);
   }
