@@ -11,3 +11,17 @@ exports.create = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.search = async (req, res, next) => {
+  try {
+    const searchEvent = new Event();
+
+    const active = req.query.active ? req.query : null;
+
+    const search = await searchEvent.search(active);
+
+    return res.status(200).json({ event: search });
+  } catch (err) {
+    next(err);
+  }
+};
