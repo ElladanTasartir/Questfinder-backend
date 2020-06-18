@@ -5,7 +5,7 @@ const EventSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     description: { type: String, required: true },
-    date: { type: Date, required: true },
+    date: { type: String, required: true },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
     active: { type: Boolean, required: true, default: true },
@@ -70,6 +70,8 @@ class Event {
       active: this.body.active,
     };
 
+    console.log(this.body.date);
+
     this.event = await EventModel.create(this.body);
     return this.event;
   }
@@ -80,7 +82,7 @@ class Event {
     return this.event;
   }
 
-  async alter() {
+  async alter(id) {
     this.checkBodyKeys();
     this.validate();
 
@@ -90,8 +92,17 @@ class Event {
       date: this.body.date,
       latitude: this.body.latitude,
       longitude: this.body.longitude,
-      active: this.body.active || false,
+      active: this.body.active || true,
     };
+
+    if (!(await this.eventExists(id)))
+      throw new ValidationError('Este evento não existe');
+
+    this.event = await EventModel.findByIdAndUpdate(id, this.body, {
+      new: true,
+    });
+
+    return this.event;
   }
 
   async eventExists(id) {
