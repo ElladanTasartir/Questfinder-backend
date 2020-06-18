@@ -1,6 +1,6 @@
 const Event = require('../model/EventModel');
 
-exports.create = async (req, res, next) => {
+const create = async (req, res, next) => {
   try {
     const event = new Event(req.body);
 
@@ -12,16 +12,26 @@ exports.create = async (req, res, next) => {
   }
 };
 
-exports.search = async (req, res, next) => {
+const search = async (req, res, next) => {
   try {
     const searchEvent = new Event();
 
     const active = req.query.active ? req.query : null;
 
-    const search = await searchEvent.search(active);
+    const foundEvent = await searchEvent.search(active);
 
-    return res.status(200).json({ event: search });
+    return res.status(200).json({ event: foundEvent });
   } catch (err) {
     next(err);
   }
 };
+const alter = async (req, res, next) => {
+  try {
+    const alterEvent = new Event(req.body);
+    return alterEvent;
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { create, alter, search };
