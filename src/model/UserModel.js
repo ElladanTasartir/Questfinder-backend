@@ -109,7 +109,7 @@ class User {
     if (!this.userExists())
       throw new ValidationError('Este usuário não existe!');
 
-    this.user = await UserModel.updateOne({ ra }, this.body);
+    this.user = await UserModel.updateOne({ ra }, this.body); // {new: true}
 
     console.log(this.user);
   }
