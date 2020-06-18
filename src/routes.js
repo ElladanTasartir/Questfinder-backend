@@ -20,5 +20,7 @@ route.put('/users/:ra', userController.alter);
 route.get('/users/:ra', userController.search);
 
 route.post('/events', eventController.create);
+
+route.get('/events', eventController.search);
 // exporta as rotas para serem devidamente indexadas no index.js
 module.exports = route;
