@@ -93,6 +93,27 @@ class Event {
 
     return !eventId ? true : null;
   }
+
+  async inativate(id) {
+    // FUnção que verifica se o evento existe
+    this.eventExists(id);
+
+    // Erro caso o evento não exista
+    if (!(await this.eventExists(id)))
+      throw new ValidationError('O evento não existe');
+
+    // Objeto que recebe o atributo ativo como false
+    const eventInative = {
+      active: false,
+    };
+
+    // Aguarda a atualização do status de ativo para inativo (false)
+    this.event = await EventModel.findByIdAndUpdate(id, eventInative, {
+      new: true,
+    });
+
+    return this.event;
+  }
 }
 
 module.exports = Event;
