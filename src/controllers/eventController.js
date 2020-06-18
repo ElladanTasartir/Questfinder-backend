@@ -16,7 +16,9 @@ const search = async (req, res, next) => {
   try {
     const searchEvent = new Event();
 
-    const active = req.query.active ? req.query : null;
+    const active = {};
+
+    if (req.query.active) active.active = req.query.active;
 
     const foundEvent = await searchEvent.search(active);
 
@@ -25,11 +27,10 @@ const search = async (req, res, next) => {
     next(err);
   }
 };
+
 const alter = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    console.log(id);
 
     const alterEvent = new Event(req.body);
 

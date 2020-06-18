@@ -32,8 +32,6 @@ const alter = async (req, res, next) => {
 
     const alteredUser = await alterUser.alter(req.params.ra);
 
-    console.log(alteredUser);
-
     return res.status(200).json(alteredUser);
   } catch (err) {
     next(err);

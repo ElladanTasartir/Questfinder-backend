@@ -70,13 +70,11 @@ class Event {
       active: this.body.active,
     };
 
-    console.log(this.body.date);
-
     this.event = await EventModel.create(this.body);
     return this.event;
   }
 
-  async search(filter = {}) {
+  async search(filter) {
     this.event = await EventModel.find(filter);
 
     return this.event;
@@ -106,9 +104,13 @@ class Event {
   }
 
   async eventExists(id) {
-    const eventId = await EventModel.findOne({ id });
+    try {
+      const eventId = await EventModel.findById(id);
 
-    return !eventId ? true : null;
+      return eventId;
+    } catch (err) {
+      return;
+    }
   }
 
   async inativate(id) {
