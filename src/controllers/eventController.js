@@ -14,7 +14,15 @@ const create = async (req, res, next) => {
 
 const alter = async (req, res, next) => {
   try {
+    const { id } = req.params;
+
+    console.log(id);
+
     const alterEvent = new Event(req.body);
+
+    const alteredEvent = await alterEvent.alter(id);
+
+    return res.status(200).json(alteredEvent);
   } catch (err) {
     next(err);
   }
