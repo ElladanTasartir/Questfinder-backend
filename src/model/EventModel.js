@@ -73,6 +73,12 @@ class Event {
     this.event = await EventModel.create(this.body);
     return this.event;
   }
+
+  async search(filter = {}) {
+    this.event = await EventModel.find(filter);
+
+    return this.event;
+  }
 }
 
 module.exports = Event;
