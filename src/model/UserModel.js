@@ -102,6 +102,8 @@ class User {
       this.user = null;
       throw new ValidationError('A senha digitada é inválida');
     }
+
+    return this.user;
   }
 
   async alter(ra) {
