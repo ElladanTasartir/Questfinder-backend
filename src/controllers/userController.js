@@ -1,4 +1,6 @@
 // Importamos aqui o model para lidar com usuários já com conexão com o banco de dados
+const jwt = require('jsonwebtoken');
+
 const User = require('../model/UserModel');
 
 // Já exportamos aqui nosso código como arrow function async
@@ -18,9 +20,17 @@ const login = async (req, res, next) => {
   try {
     const loginUser = new User(req.body);
 
-    await loginUser.login();
+    const user = await loginUser.login();
 
-    return res.status(200).json({ message: 'Login validado com sucesso!' });
+    const { ra, email } = user;
+
+    const token = jwt.sign({ ra, email }, process.env.TOKEN_SECRET, {
+      expiresIn: process.env.TOKEN_EXPIRATION,
+    });
+
+    return res
+      .status(200)
+      .json({ token, message: 'Login validado com sucesso!' });
   } catch (err) {
     next(err);
   }
@@ -28,9 +38,11 @@ const login = async (req, res, next) => {
 
 const alter = async (req, res, next) => {
   try {
+    const { userRA } = req;
+
     const alterUser = new User(req.body);
 
-    const alteredUser = await alterUser.alter(req.params.ra);
+    const alteredUser = await alterUser.alter(userRA);
 
     return res.status(200).json(alteredUser);
   } catch (err) {
