@@ -4,27 +4,28 @@ const express = require('express');
 // Controlador para lidar com usuários
 const userController = require('./controllers/userController');
 const eventController = require('./controllers/eventController');
+const loginRequired = require('./middlewares/loginRequired');
 
 // Importa o módulo de rotas do Express para lidar com as requisições HTTP
 const route = express.Router();
 
 // Rota de registro de usuários que chama o controlador, "userController" pra lidar com cadastros
-route.post('/users/register', userController.create);
+route.post('/users/', userController.create);
 
 // Rota de Login
-route.post('/login', userController.login);
+route.post('/signin', userController.login);
 
-route.put('/users/:ra', userController.alter);
+route.put('/users/', loginRequired, userController.alter);
 
 // Rota de Procurar Usuário
-route.get('/users/:ra', userController.search);
+route.get('/users/:ra', loginRequired, userController.search);
 
-route.post('/events', eventController.create);
+route.post('/events', loginRequired, eventController.create);
 
-route.get('/events', eventController.search);
+route.get('/events', loginRequired, eventController.search);
 
-route.patch('/events/:id', eventController.inativate);
+route.patch('/events/:id', loginRequired, eventController.inativate);
 
-route.put('/events/:id', eventController.alter);
+route.put('/events/:id', loginRequired, eventController.alter);
 // exporta as rotas para serem devidamente indexadas no index.js
 module.exports = route;
