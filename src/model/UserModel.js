@@ -1,99 +1,146 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
-const bcryptjs = require("bcryptjs");
+const mongoose = require('mongoose');
+const validator = require('validator');
+const bcryptjs = require('bcryptjs');
+const ValidationError = require('../errors/ValidationError');
 
 // Schema do usuário para criar o documento no banco
-const UserSchema = new mongoose.Schema({
-  ra: { type: String, required: true },
-  nome: { type: String, required: true },
-  email: { type: String, required: true },
-  senha: { type: String, require: true },
-});
+const UserSchema = new mongoose.Schema(
+  {
+    ra: { type: String, required: true },
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    password: { type: String, require: true },
+  },
+  { versionKey: false },
+);
 
 // Criado o modelo baseado no schema
-const UserModel = mongoose.model("User", UserSchema);
+const UserModel = mongoose.model('User', UserSchema);
 
 // Classe de usuário responsávle por validar e criar os dados
 class User {
   constructor(body) {
     this.body = body;
     this.user = null;
-    this.errors = [];
+  }
+
+  encryptPassword() {
+    const salt = bcryptjs.genSaltSync();
+    this.body.password = bcryptjs.hashSync(this.body.password, salt);
   }
 
   // Função responsável por registrar o usuário novo no banco de dados
   async register() {
-    try {
-      this.validate();
+    this.checkBodyKeys();
 
-      this.body = {
-        ra: this.body.ra,
-        nome: this.body.nome,
-        email: this.body.email,
-        senha: this.body.senha,
-      };
+    this.validate();
 
-      await this.userExists();
+    this.body = {
+      ra: this.body.ra,
+      name: this.body.name,
+      email: this.body.email,
+      password: this.body.password,
+    };
 
-      const salt = bcryptjs.genSaltSync();
-      this.body.senha = bcryptjs.hashSync(this.body.senha, salt);
-      if (this.errors.length > 0) throw new Error();
+    if (!(await this.userExists(this.body.ra)))
+      throw new ValidationError('Já existe um usuário cadastrado com este RA');
 
-      this.user = await UserModel.create(this.body);
-      return this.user;
-    } catch (err) {
-      return false;
-    }
+    if (!(await this.emailExists(this.body.email)))
+      throw new ValidationError(
+        'Já existe um usuário cadastrado com este email',
+      );
+
+    this.encryptPassword();
+
+    this.user = await UserModel.create(this.body);
+    return this.user;
+  }
+
+  checkBodyKeys() {
+    if (!this.body.ra) throw new ValidationError('RA é um dado necessário');
+    if (!this.body.name) throw new ValidationError('Nome é um dado necessário');
+    if (!this.body.email)
+      throw new ValidationError('Email é um dado necessário');
+    if (!this.body.password)
+      throw new ValidationError('Senha é um dado necessário');
   }
 
   // Função que irá validar os dados do objeto
   validate() {
-    try {
-      if (!validator.isEmail(this.body.email)) throw new Error();
+    if (!validator.isEmail(this.body.email))
+      throw new ValidationError('Email inválido');
 
-      if (this.body.senha.length < 6 || this.body.senha.length > 16)
-        throw new Error();
-    } catch (err) {
-      this.errors.push("Dados inválidos");
-    }
+    if (this.body.password.length < 6 || this.body.password.length > 16)
+      throw new ValidationError('Dados inválidos');
   }
 
-  async userExists() {
-    const userRA = await UserModel.findOne({ ra: this.body.ra });
+  async userExists(ra) {
+    const userRA = await UserModel.findOne({ ra });
 
-    if (userRA) this.errors.push("Já existe um usuário cadastrado com este RA");
-
-    const userEmail = await UserModel.findOne({ email: this.body.email });
-
-    if (userEmail)
-      this.errors.push("Já existe um usuário cadastrado com este Email");
+    return !userRA ? true : null;
   }
 
-  // eslint-disable-next-line consistent-return
+  async emailExists(email) {
+    const userEmail = await UserModel.findOne({ email });
+
+    return !userEmail ? true : null;
+  }
+
   async login() {
-    try {
-      this.body = {
-        ra: this.body.ra,
-        senha: this.body.senha,
-      };
+    this.body = {
+      ra: this.body.ra,
+      password: this.body.password,
+    };
 
-      if (this.errors.length > 0) throw new Error();
+    this.user = await UserModel.findOne({ ra: this.body.ra });
 
-      this.user = await UserModel.findOne({ ra: this.body.ra });
-
-      if (!this.user) {
-        this.errors.push("Usuário não encontrado");
-        throw new Error();
-      }
-
-      if (!bcryptjs.compareSync(this.body.senha, this.user.senha)) {
-        this.errors.push("A senha digitada é inválida");
-        this.user = null;
-        throw new Error();
-      }
-    } catch (err) {
-      return false;
+    if (!this.user) {
+      throw new ValidationError('Usuário não encontrado');
     }
+
+    if (!bcryptjs.compareSync(this.body.password, this.user.password)) {
+      this.user = null;
+      throw new ValidationError('A senha digitada é inválida');
+    }
+
+    return this.user;
+  }
+
+  async alter(ra) {
+    this.checkBodyKeys();
+
+    this.validate();
+
+    this.body = {
+      name: this.body.name,
+      email: this.body.email,
+      password: this.body.password,
+    };
+
+    this.encryptPassword();
+
+    if (await this.userExists(ra))
+      throw new ValidationError('Este usuário não existe!');
+
+    await UserModel.updateOne({ ra }, this.body);
+
+    this.user = await UserModel.findOne({ ra });
+
+    return this.user;
+  }
+
+  // Função que faz a busca por usuário registrado, pelo RA
+  async search(ra) {
+    // Pesquisa primeira ocorrência do usuário com o RA no banco (no caso, a única ocorrência)
+    this.user = await UserModel.findOne({ ra });
+
+    // Se não for usuário válido, retorna a mensagem abaixo
+    if (!this.user) {
+      throw new ValidationError('Usuário não encontrado');
+    }
+
+    // Retorna o usuário caso a busca seja bem sucedida
+    return this.user;
   }
 }
 
